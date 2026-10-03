@@ -1,0 +1,45 @@
+{
+  "cik": 320193,
+  "entityName": "Apple Inc.",
+  "facts": {
+    "us-gaap": {
+      "RevenueFromContractWithCustomerExcludingAssessedTax": {
+        "label": "Revenue from Contract with Customer, Excluding Assessed Tax",
+        "description": "Revenue from contracts with customers, excluding assessed tax.",
+        "units": {
+          "USD": [
+            {
+              "accn": "0000320193-23-000106",
+              "fy": 2023,
+              "fp": "FY",
+              "form": "10-K",
+              "filed": "2023-11-03",
+              "start": "2022-09-25",
+              "end": "2023-09-30",
+              "val": 383285000000,
+              "frame": "CY2023"
+            }
+          ]
+        }
+      },
+      "Assets": {
+        "label": "Assets",
+        "description": "Sum of the carrying amounts of all assets.",
+        "units": {
+          "USD": [
+            {
+              "accn": "0000320193-23-000106",
+              "fy": 2023,
+              "fp": "FY",
+              "form": "10-K",
+              "filed": "2023-11-03",
+              "end": "2023-09-30",
+              "val": 352583000000,
+              "frame": "CY2023Q3I"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
