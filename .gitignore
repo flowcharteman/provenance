@@ -24,3 +24,5 @@ coverage/
 *.log
 .DS_Store
 .vscode/
+
+.scratch/
