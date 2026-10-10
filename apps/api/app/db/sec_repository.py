@@ -12,7 +12,11 @@ from psycopg import AsyncConnection
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-from app.adapters.sec.catalog import SEC_METRICS, SecMetricSpec
+from app.adapters.sec.catalog import (
+    SEC_METRICS,
+    SecMetricSpec,
+    sec_tag_is_issuer_scoped,
+)
 from app.adapters.types import (
     CompanyCandidate,
     FilingReference,
@@ -411,8 +415,16 @@ class SecPostgresRepository:
                 metric_id = await self._ensure_metric(metric_spec)
                 tag = str(candidate.context.get("tag") or "")
                 taxonomy = str(candidate.context.get("taxonomy") or "")
+                issuer_cik = candidate.context.get("issuer_cik")
+                source_context_key = taxonomy
+                if isinstance(issuer_cik, str) and sec_tag_is_issuer_scoped(
+                    taxonomy, tag, issuer_cik
+                ):
+                    source_context_key = (
+                        f"{taxonomy}:issuer_cik={issuer_cik}"
+                    )
                 await self._ensure_source_metric_mapping(
-                    source_id, f"{taxonomy}:{tag}", taxonomy, metric_id
+                    source_id, f"{taxonomy}:{tag}", source_context_key, metric_id
                 )
                 series_key = _series_key(candidate, taxonomy, tag)
                 await self._connection.execute(

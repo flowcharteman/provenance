@@ -15,7 +15,7 @@ from app.adapters.contracts import (
     IdentifierAdapter,
 )
 from app.adapters.errors import AdapterError
-from app.adapters.sec.catalog import SEC_METRICS
+from app.adapters.sec.catalog import sec_tags_for_ingestion
 from app.adapters.sec.normalizer import (
     SecFactNormalizer,
     unsupported_fact_reasons,
@@ -160,9 +160,7 @@ class SecIngestionService:
             self._metadata,
         )
 
-        metric_tags = sorted(
-            tag for metric in SEC_METRICS for tag in metric.tags
-        )
+        metric_tags = sec_tags_for_ingestion()
         financial_observations = await self._executor.request(
             self._financial_facts.fetch_financial_observations,
             ObservationQuery(

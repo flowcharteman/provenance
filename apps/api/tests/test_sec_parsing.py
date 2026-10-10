@@ -181,3 +181,126 @@ class SecParsingTests(unittest.IsolatedAsyncioTestCase):
         }
         reasons = unsupported_fact_reasons(payload)
         self.assertEqual(reasons["unmapped_tag"], 1)
+
+    async def test_issuer_scoped_tags_do_not_leak_between_companies(self):
+        fact = {
+            "form": "10-K",
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "fy": 2025,
+            "fp": "FY",
+            "filed": "2026-02-05",
+            "accn": "0000000000-26-000001",
+            "val": 100,
+        }
+        instant_fact = {
+            "form": "10-K",
+            "end": "2025-12-31",
+            "fy": 2025,
+            "fp": "FY",
+            "filed": "2026-02-05",
+            "accn": "0000000000-26-000001",
+            "val": 200,
+        }
+        companyfacts = {
+            "facts": {
+                "us-gaap": {
+                    "Depreciation": {
+                        "label": "Depreciation",
+                        "units": {"USD": [fact]},
+                    },
+                    "DepreciationDepletionAndAmortization": {
+                        "label": "Depreciation, Depletion and Amortization",
+                        "units": {"USD": [fact]},
+                    },
+                    "CashCashEquivalentsAndShortTermInvestments": {
+                        "label": "Cash, Cash Equivalents, and Short-term Investments",
+                        "units": {"USD": [instant_fact]},
+                    },
+                    "OtherLongTermInvestments": {
+                        "label": "Other Long-term Investments",
+                        "units": {"USD": [instant_fact]},
+                    },
+                    "PaymentsToAcquireProductiveAssets": {
+                        "label": "Payments to Acquire Productive Assets",
+                        "units": {"USD": [fact]},
+                    },
+                    "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments": {
+                        "label": "Income before taxes",
+                        "units": {"USD": [fact]},
+                    },
+                }
+            }
+        }
+
+        def financial_tags(cik):
+            observations = parse_companyfacts_observations(
+                {"cik": int(cik), **companyfacts},
+                cik=cik,
+                retrieved_at=self.retrieved_at,
+                url=f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
+            )
+            return observations, {
+                str(item.provider_payload.get("tag"))
+                for item in observations
+                if item.kind is ObservationKind.FINANCIAL
+            }
+
+        alphabet_observations, alphabet_tags = financial_tags("0001652044")
+        amazon_observations, amazon_tags = financial_tags("0001018724")
+        self.assertEqual(
+            alphabet_tags,
+            {
+                "Depreciation",
+                "DepreciationDepletionAndAmortization",
+                "CashCashEquivalentsAndShortTermInvestments",
+                "OtherLongTermInvestments",
+            },
+        )
+        self.assertEqual(
+            amazon_tags,
+            {
+                "DepreciationDepletionAndAmortization",
+                "PaymentsToAcquireProductiveAssets",
+                "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+            },
+        )
+
+        alphabet_facts = await SecFactNormalizer().normalize(
+            tuple(
+                PersistedSourceObservation(uuid4(), item)
+                for item in alphabet_observations
+            ),
+            company_id=uuid4(),
+        )
+        amazon_facts = await SecFactNormalizer().normalize(
+            tuple(
+                PersistedSourceObservation(uuid4(), item)
+                for item in amazon_observations
+            ),
+            company_id=uuid4(),
+        )
+        self.assertIn(
+            ("depreciation_depletion_and_amortization", "Depreciation"),
+            {(item.metric_key, item.context["tag"]) for item in alphabet_facts},
+        )
+        alphabet_depreciation = next(
+            item for item in alphabet_facts if item.context["tag"] == "Depreciation"
+        )
+        self.assertEqual(alphabet_depreciation.context["issuer_cik"], "0001652044")
+        self.assertIn(
+            ("cash_and_short_term_investments", "CashCashEquivalentsAndShortTermInvestments"),
+            {(item.metric_key, item.context["tag"]) for item in alphabet_facts},
+        )
+        self.assertIn(
+            ("other_long_term_investments", "OtherLongTermInvestments"),
+            {(item.metric_key, item.context["tag"]) for item in alphabet_facts},
+        )
+        self.assertNotIn(
+            "Depreciation",
+            {item.context["tag"] for item in amazon_facts},
+        )
+        self.assertIn(
+            ("capital_expenditures", "PaymentsToAcquireProductiveAssets"),
+            {(item.metric_key, item.context["tag"]) for item in amazon_facts},
+        )

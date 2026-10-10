@@ -7,6 +7,7 @@ import base64
 import hashlib
 import json
 import os
+import ssl
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -16,6 +17,8 @@ from typing import Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+
+import certifi
 
 from app.adapters.errors import AdapterError, AdapterErrorStatus
 
@@ -70,7 +73,12 @@ class SecHttpClient:
             method="GET",
         )
         try:
-            with urlopen(request, timeout=self._timeout_seconds) as response:
+            context = ssl.create_default_context(cafile=certifi.where())
+            with urlopen(
+                request,
+                timeout=self._timeout_seconds,
+                context=context,
+            ) as response:
                 body = response.read()
                 status = response.status
                 headers = dict(response.headers.items())

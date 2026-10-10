@@ -8,7 +8,10 @@ from datetime import date, datetime, time, timezone
 from typing import Any, Mapping
 from uuid import UUID
 
-from app.adapters.sec.catalog import SEC_TAG_TO_METRIC
+from app.adapters.sec.catalog import (
+    sec_metric_for_tag,
+    sec_tag_is_issuer_scoped,
+)
 from app.adapters.sec.parsing import (
     is_currency_unit,
     parse_decimal,
@@ -22,7 +25,7 @@ from app.adapters.types import (
 )
 
 
-NORMALIZER_VERSION = "sec-companyfacts-v1"
+NORMALIZER_VERSION = "sec-companyfacts-v3"
 
 
 class SecFactNormalizer:
@@ -86,7 +89,11 @@ class SecFactNormalizer:
     ) -> NormalizedFactCandidate | None:
         taxonomy = str(payload.get("taxonomy") or "")
         tag = str(payload.get("tag") or "")
-        metric = SEC_TAG_TO_METRIC.get((taxonomy, tag))
+        metric = sec_metric_for_tag(
+            taxonomy,
+            tag,
+            str(payload.get("cik") or "") or None,
+        )
         fact = payload.get("fact")
         if metric is None or not isinstance(fact, dict):
             return None
@@ -134,9 +141,15 @@ class SecFactNormalizer:
 
         fact_filed_at = _parse_datetime(fact.get("filed")) or published_at
         canonical_currency = unit_code if is_currency_unit(unit_code) else None
+        issuer_cik = str(tag_info.get("cik") or "")
         context = {
             "taxonomy": taxonomy,
             "tag": tag,
+            "issuer_cik": (
+                issuer_cik
+                if sec_tag_is_issuer_scoped(taxonomy, tag, issuer_cik)
+                else None
+            ),
             "label": str(tag_info.get("label") or ""),
             "description": str(tag_info.get("description") or ""),
             "form": form,
@@ -173,11 +186,12 @@ def unsupported_fact_reasons(
     facts_root = payload.get("facts", {})
     if not isinstance(facts_root, dict):
         return {"invalid_companyfacts_shape": 1}
+    cik = str(payload.get("cik") or "") or None
     for taxonomy, tags in facts_root.items():
         if not isinstance(tags, dict):
             continue
         for tag, tag_info in tags.items():
-            if (str(taxonomy), str(tag)) not in SEC_TAG_TO_METRIC:
+            if sec_metric_for_tag(str(taxonomy), str(tag), cik) is None:
                 reasons["unmapped_tag"] += _fact_row_count(tag_info)
                 continue
             units = tag_info.get("units", {}) if isinstance(tag_info, dict) else {}

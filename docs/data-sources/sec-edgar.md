@@ -83,14 +83,31 @@ Company Facts is fetched from the official SEC XBRL endpoint. The full parsed
 response is retained as a document source observation; selected fact records
 are separately retained as source observations for row-level lineage.
 
-The initial canonical map is deliberately small and covers selected US-GAAP
-consolidated metrics: revenue, operating income, net income, total assets, total
-liabilities, stockholders' equity, and cash and cash equivalents. Mappings are
-recorded in `source_metric_mappings`; taxonomy, tag, source label/description,
-form, accession, fiscal year/period, frame, and original unit are kept in
+The curated canonical map covers selected US-GAAP consolidated metrics:
+revenue, operating and net income, pretax income, income taxes, D&A, capex,
+diluted shares, selected cash/investment and debt balances, and core balance
+sheet totals. Alphabet and Amazon mappings include issuer-scoped tags, recorded
+with the issuer CIK in `source_metric_mappings`; they do not broaden the generic
+tag mapping for other issuers. Taxonomy, tag, source label/description, form,
+accession, fiscal year/period, frame, and original unit are kept in
 observation/context data. Unsupported concepts remain in the retained Company
 Facts document and are counted in the normalization run report; no heuristic
 tag matching is used.
+
+Issuer-specific interpretation notes:
+
+- Alphabet's `CashCashEquivalentsAndShortTermInvestments` is stored as an
+  aggregate metric; do not add its separately reported cash component to that
+  aggregate. `Depreciation` is the available D&A proxy and does not include
+  identified intangible amortization.
+- Amazon's `DepreciationDepletionAndAmortization` is the combined D&A fact;
+  its `Depreciation` and `AmortizationOfIntangibleAssets` detail tags are not
+  mapped as additional D&A facts. `PaymentsToAcquireProductiveAssets` maps to
+  capex. Missing balances, including absent commercial-paper facts, remain
+  absent rather than being filled with zero.
+- A tag change can create separate source-tag series under one canonical
+  metric. Preserve the tag/accession provenance and review potential historical
+  overlaps before aggregating those series.
 
 Period rules:
 

@@ -17,7 +17,7 @@ from app.adapters.types import (
     Provenance,
     SourceObservation,
 )
-from app.adapters.sec.catalog import SEC_TAG_TO_METRIC
+from app.adapters.sec.catalog import sec_metric_for_tag
 
 
 SUPPORTED_FORMS = frozenset({"10-K", "10-Q", "8-K"})
@@ -303,7 +303,10 @@ def parse_companyfacts_observations(
         if not isinstance(tag_collection, dict):
             continue
         for tag, tag_info in tag_collection.items():
-            if (taxonomy, tag) not in SEC_TAG_TO_METRIC or not isinstance(tag_info, dict):
+            if (
+                sec_metric_for_tag(taxonomy, tag, normalized_cik) is None
+                or not isinstance(tag_info, dict)
+            ):
                 continue
             units = tag_info.get("units")
             if not isinstance(units, dict):
