@@ -525,6 +525,146 @@ class SecPostgresRepository:
             )
         return run_id, written_facts
 
+    async def find_company_by_ticker(
+        self, ticker: str
+    ) -> Mapping[str, Any] | None:
+        normalized_ticker = ticker.strip().upper()
+        if not normalized_ticker:
+            raise ValueError("Ticker cannot be empty")
+
+        rows = await (
+            await self._connection.execute(
+                """
+                SELECT DISTINCT
+                    company.id,
+                    company.display_name AS name,
+                    company.display_name,
+                    company.sector,
+                    company.industry,
+                    sec_cik.normalized_value AS cik,
+                    ticker_identifier.identifier_value AS ticker
+                FROM company_identifiers AS ticker_identifier
+                JOIN companies AS company
+                  ON company.id = ticker_identifier.company_id
+                JOIN company_identifiers AS sec_cik
+                  ON sec_cik.company_id = company.id
+                 AND sec_cik.namespace = 'SEC'
+                 AND sec_cik.identifier_type = 'CIK'
+                WHERE ticker_identifier.identifier_type = 'TICKER'
+                  AND ticker_identifier.normalized_value = %s
+                  AND (
+                    ticker_identifier.namespace = 'SEC'
+                    OR ticker_identifier.namespace =
+                       'SEC:CIK:' || sec_cik.normalized_value
+                  )
+                ORDER BY company.display_name, company.id
+                """,
+                (normalized_ticker,),
+            )
+        ).fetchall()
+        if len(rows) > 1:
+            raise CompanyResolutionError(
+                f"Ticker {normalized_ticker} matches multiple SEC companies."
+            )
+        return rows[0] if rows else None
+
+    async def get_company(
+        self, company_id: UUID | str
+    ) -> Mapping[str, Any] | None:
+        normalized_company_id = UUID(str(company_id))
+        row = await (
+            await self._connection.execute(
+                """
+                SELECT
+                    company.id,
+                    company.display_name AS name,
+                    company.display_name,
+                    company.legal_name,
+                    company.sector,
+                    company.industry,
+                    (
+                        SELECT identifier.normalized_value
+                        FROM company_identifiers AS identifier
+                        WHERE identifier.company_id = company.id
+                          AND identifier.namespace = 'SEC'
+                          AND identifier.identifier_type = 'CIK'
+                        LIMIT 1
+                    ) AS cik,
+                    COALESCE(
+                        (
+                            SELECT security.ticker
+                            FROM securities AS security
+                            WHERE security.company_id = company.id
+                              AND security.listing_status = 'ACTIVE'
+                              AND security.ticker IS NOT NULL
+                            ORDER BY security.first_listing_date NULLS LAST,
+                                     security.ticker
+                            LIMIT 1
+                        ),
+                        (
+                            SELECT identifier.identifier_value
+                            FROM company_identifiers AS identifier
+                            WHERE identifier.company_id = company.id
+                              AND identifier.identifier_type = 'TICKER'
+                              AND (
+                                identifier.namespace = 'SEC'
+                                OR left(identifier.namespace, 8) = 'SEC:CIK:'
+                              )
+                            ORDER BY identifier.is_primary DESC,
+                                     identifier.created_at DESC,
+                                     identifier.identifier_value
+                            LIMIT 1
+                        )
+                    ) AS ticker
+                FROM companies AS company
+                WHERE company.id = %s
+                """,
+                (normalized_company_id,),
+            )
+        ).fetchone()
+        return row
+
+    async def get_financial_facts(
+        self, company_id: UUID | str
+    ) -> Sequence[Mapping[str, Any]]:
+        normalized_company_id = UUID(str(company_id))
+        rows = await (
+            await self._connection.execute(
+                """
+                WITH latest_fiscal_facts AS (
+                    SELECT DISTINCT ON (fact.series_key)
+                        metric.metric_key,
+                        fact.value,
+                        fact.unit_code AS unit,
+                        NULLIF(fact.context->>'fiscal_year', '')::INTEGER AS fiscal_year,
+                        NULLIF(fact.context->>'accession_number', '') AS accession_number,
+                        fact.period_end,
+                        fact.version_number,
+                        fact.series_key
+                    FROM financial_facts AS fact
+                    JOIN metric_definitions AS metric
+                      ON metric.id = fact.metric_definition_id
+                    WHERE fact.company_id = %s
+                      AND fact.context->>'fiscal_period' = 'FY'
+                    ORDER BY fact.series_key, fact.version_number DESC
+                )
+                SELECT
+                    metric_key,
+                    value,
+                    unit,
+                    fiscal_year,
+                    accession_number
+                FROM latest_fiscal_facts
+                ORDER BY fiscal_year DESC NULLS LAST,
+                         period_end DESC NULLS LAST,
+                         metric_key,
+                         accession_number
+                """,
+                (normalized_company_id,),
+            )
+        ).fetchall()
+        return tuple(rows)
+
     async def verify_pipeline(self, company_id: UUID) -> Mapping[str, int]:
         rows = await (
             await self._connection.execute(

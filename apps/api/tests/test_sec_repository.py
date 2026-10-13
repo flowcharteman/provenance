@@ -14,6 +14,27 @@ class FakeCursor:
         return self.row
 
 
+class FakeReadCursor:
+    def __init__(self, rows=()):
+        self.rows = list(rows)
+
+    async def fetchone(self):
+        return self.rows[0] if self.rows else None
+
+    async def fetchall(self):
+        return self.rows
+
+
+class FakeReadConnection:
+    def __init__(self, rows=()):
+        self.rows = list(rows)
+        self.executed = []
+
+    async def execute(self, statement, parameters):
+        self.executed.append((statement, parameters))
+        return FakeReadCursor(self.rows)
+
+
 class FakeObservationConnection:
     def __init__(self):
         self.records = {}
@@ -72,3 +93,77 @@ class SecRepositoryTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(first_inserted)
         self.assertFalse(second_inserted)
         self.assertEqual(first_id, second_id)
+
+    async def test_find_company_by_ticker_uses_sec_company_identifiers(self):
+        company = {
+            "id": uuid4(),
+            "name": "Apple Inc.",
+            "display_name": "Apple Inc.",
+            "sector": "Technology",
+            "industry": "Consumer Electronics",
+            "cik": "0000320193",
+            "ticker": "AAPL",
+        }
+        connection = FakeReadConnection([company])
+        repository = SecPostgresRepository(connection)
+
+        result = await repository.find_company_by_ticker(" aapl ")
+
+        self.assertEqual(result, company)
+        statement, parameters = connection.executed[0]
+        self.assertEqual(parameters, ("AAPL",))
+        self.assertIn("sec_cik.namespace = 'SEC'", statement)
+        self.assertIn("ticker_identifier.identifier_type = 'TICKER'", statement)
+        self.assertTrue(statement.lstrip().startswith("SELECT"))
+
+    async def test_get_company_returns_details_or_none(self):
+        company_id = uuid4()
+        company = {
+            "id": company_id,
+            "name": "Apple Inc.",
+            "display_name": "Apple Inc.",
+            "legal_name": "Apple Inc.",
+            "sector": "Technology",
+            "industry": "Consumer Electronics",
+            "cik": "0000320193",
+            "ticker": "AAPL",
+        }
+        connection = FakeReadConnection([company])
+        repository = SecPostgresRepository(connection)
+
+        result = await repository.get_company(str(company_id))
+
+        self.assertEqual(result, company)
+        statement, parameters = connection.executed[0]
+        self.assertEqual(parameters, (company_id,))
+        self.assertIn("left(identifier.namespace, 8) = 'SEC:CIK:'", statement)
+        self.assertTrue(statement.lstrip().startswith("SELECT"))
+
+        missing_connection = FakeReadConnection()
+        missing_repository = SecPostgresRepository(missing_connection)
+        self.assertIsNone(await missing_repository.get_company(company_id))
+
+    async def test_get_financial_facts_returns_latest_annual_facts_with_provenance(self):
+        company_id = uuid4()
+        facts = [
+            {
+                "metric_key": "revenue",
+                "value": 391035000000,
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "accession_number": "0000320193-25-000079",
+            }
+        ]
+        connection = FakeReadConnection(facts)
+        repository = SecPostgresRepository(connection)
+
+        result = await repository.get_financial_facts(str(company_id))
+
+        self.assertEqual(result, tuple(facts))
+        statement, parameters = connection.executed[0]
+        self.assertEqual(parameters, (company_id,))
+        self.assertIn("fact.context->>'fiscal_period' = 'FY'", statement)
+        self.assertIn("fact.context->>'fiscal_year'", statement)
+        self.assertIn("fact.context->>'accession_number'", statement)
+        self.assertIn("fact.version_number DESC", statement)
+        self.assertTrue(statement.lstrip().startswith("WITH"))

@@ -44,11 +44,12 @@ FY2025 diluted weighted-average share count is **15.004697bn**.
   Their multiples are applied to Apple FY2025 EBITDA of $144.748bn, bridged
   using Apple's net cash, and divided by 15.004697bn Apple diluted shares,
   producing **$193.81–$323.77/share**. Microsoft is re-included under the
-  explicit commercial-paper assumption described below.
+  explicit commercial-paper assumption described below. It contributes the
+  low endpoint.
 - **EV/Revenue comps range:** Apple, Microsoft, and Alphabet are included.
   Their multiples are applied to Apple FY2025 revenue of $416.161bn, with the
   same Apple net-cash bridge and diluted-share denominator, producing
-  **$285.43–$324.63/share**.
+  **$285.43–$324.63/share**. Microsoft contributes the high endpoint.
 - **Microsoft P/E comps:** 29.38x × Apple FY2025 net income of $112.010bn =
   $3,290.854bn implied equity; ÷ 15.004697bn shares = **$219.32/share**.
 
