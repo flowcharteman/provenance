@@ -10,18 +10,10 @@ import {
   type CompanyDetail,
   type CompanyFact
 } from "../../../lib/api";
+import { formatValue } from "../../../lib/format";
 
 type LoadState = "idle" | "loading" | "ready" | "not-found" | "error";
 
-// Groups digits as a string so large or fractional values keep exact precision.
-function formatValue(raw: string): string {
-  const match = /^(-?)(\d+)(\.\d+)?$/.exec(raw);
-  if (!match) {
-    return raw;
-  }
-  const [, sign, integer, fraction = ""] = match;
-  return `${sign}${integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}${fraction}`;
-}
 
 export default function CompanyDetailPage() {
   const params = useParams<{ id: string }>();
