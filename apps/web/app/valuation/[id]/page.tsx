@@ -137,6 +137,7 @@ export default function ValuationPage() {
               Apple market price: <strong>$332.89</strong> per share (supplied external input, Oct. 5, 2026;
               not an SEC fact). Point estimates have equal low and high.
             </p>
+            {/* Manual copy of docs/reports/valuation/football-field.svg; re-copy if the source changes. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className="valuation-chart"
