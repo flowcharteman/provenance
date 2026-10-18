@@ -1,54 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="390" viewBox="0 0 960 390" role="img" aria-labelledby="title desc">
-  <title id="title">Apple football field valuation summary</title>
-  <desc id="desc">Implied share prices for DCF sensitivity, comparable company methods, and LBO ability-to-pay, compared with a market price of 332 dollars and 89 cents.</desc>
-  <rect width="960" height="390" fill="#ffffff"/>
-  <text x="28" y="34" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#18212f">Apple implied value per share</text>
-  <text x="28" y="55" font-family="Arial, sans-serif" font-size="12" fill="#536174">USD/share · point estimates shown as markers · market price: $332.89</text>
-  <g font-family="Arial, sans-serif" font-size="13" fill="#263244">
-    <text x="28" y="103">DCF sensitivity</text>
-    <text x="28" y="153">Comps · EV / EBITDA</text>
-    <text x="28" y="203">Comps · P/E</text>
-    <text x="28" y="253">LBO ability-to-pay</text>
-    <text x="28" y="303">Comps · EV / Revenue</text>
-  </g>
-  <g stroke="#d8dee8" stroke-width="1">
-    <line x1="250" y1="72" x2="250" y2="330"/>
-    <line x1="430" y1="72" x2="430" y2="330"/>
-    <line x1="610" y1="72" x2="610" y2="330"/>
-    <line x1="790" y1="72" x2="790" y2="330"/>
-    <line x1="880" y1="72" x2="880" y2="330"/>
-  </g>
-  <g stroke="#65758b" stroke-width="2">
-    <line x1="250" y1="330" x2="880" y2="330"/>
-    <line x1="250" y1="321" x2="250" y2="337"/>
-    <line x1="430" y1="321" x2="430" y2="337"/>
-    <line x1="610" y1="321" x2="610" y2="337"/>
-    <line x1="790" y1="321" x2="790" y2="337"/>
-    <line x1="880" y1="321" x2="880" y2="337"/>
-  </g>
-  <g font-family="Arial, sans-serif" font-size="11" fill="#536174" text-anchor="middle">
-    <text x="250" y="354">$0</text>
-    <text x="430" y="354">$100</text>
-    <text x="610" y="354">$200</text>
-    <text x="790" y="354">$300</text>
-    <text x="880" y="354">$350</text>
-  </g>
-  <line x1="849.2" y1="68" x2="849.2" y2="326" stroke="#d63b36" stroke-width="2" stroke-dasharray="6 5"/>
-  <text x="844" y="68" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#b12d29">$332.89 market</text>
-  <g stroke-linecap="round">
-    <line x1="409.3" y1="98" x2="473.8" y2="98" stroke="#2878b5" stroke-width="12"/>
-    <circle cx="598.9" cy="148" r="7" fill="#36a269"/>
-    <circle cx="644.8" cy="198" r="7" fill="#9567bd"/>
-    <circle cx="480.7" cy="248" r="7" fill="#e1932e"/>
-    <circle cx="834.2" cy="298" r="7" fill="#20a6a6"/>
-  </g>
-  <g font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">
-    <text x="409.3" y="87" text-anchor="middle">$88.53</text>
-    <text x="473.8" y="87" text-anchor="middle">$124.33</text>
-    <text x="598.9" y="137" text-anchor="middle">$193.84</text>
-    <text x="644.8" y="187" text-anchor="middle">$219.32</text>
-    <text x="480.7" y="237" text-anchor="middle">$128.19</text>
-    <text x="834.2" y="287" text-anchor="middle">$324.54</text>
-  </g>
-  <text x="28" y="379" font-family="Arial, sans-serif" font-size="10" fill="#718096">DCF endpoints span the 9.51%-11.51% WACC × 2.00%-3.00% terminal-growth sensitivity grid.</text>
-</svg>
+<title id="title">Apple football field valuation summary</title>
+<desc id="desc">Implied share price ranges by method compared with a market price of 332 dollars and 89 cents.</desc>
+<rect width="960" height="390" fill="#ffffff"/>
+<text x="28" y="34" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#18212f">Apple implied value per share</text>
+<text x="28" y="55" font-family="Arial, sans-serif" font-size="12" fill="#536174">USD/share · bars show low–high; dots are point estimates · market price: $332.89</text>
+<text x="28" y="103" font-family="Arial, sans-serif" font-size="13" fill="#263244">DCF sensitivity</text>
+<text x="28" y="153" font-family="Arial, sans-serif" font-size="13" fill="#263244">Comps · EV / EBITDA</text>
+<text x="28" y="203" font-family="Arial, sans-serif" font-size="13" fill="#263244">Comps · P/E (Microsoft)</text>
+<text x="28" y="253" font-family="Arial, sans-serif" font-size="13" fill="#263244">LBO ability-to-pay</text>
+<text x="28" y="303" font-family="Arial, sans-serif" font-size="13" fill="#263244">Comps · EV / Revenue</text>
+<line x1="250.0" y1="72" x2="250.0" y2="330" stroke="#d8dee8"/><text x="250.0" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#536174">$0</text>
+<line x1="430.0" y1="72" x2="430.0" y2="330" stroke="#d8dee8"/><text x="430.0" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#536174">$100</text>
+<line x1="610.0" y1="72" x2="610.0" y2="330" stroke="#d8dee8"/><text x="610.0" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#536174">$200</text>
+<line x1="790.0" y1="72" x2="790.0" y2="330" stroke="#d8dee8"/><text x="790.0" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#536174">$300</text>
+<line x1="880.0" y1="72" x2="880.0" y2="330" stroke="#d8dee8"/><text x="880.0" y="354" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#536174">$350</text>
+<line x1="250" y1="330" x2="880" y2="330" stroke="#65758b" stroke-width="2"/>
+<line x1="849.2" y1="68" x2="849.2" y2="326" stroke="#d63b36" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="844.2" y="62" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#b12d29">$332.89 market</text>
+<line x1="409.4" y1="98" x2="473.8" y2="98" stroke="#2878b5" stroke-width="12" stroke-linecap="round"/>
+<text x="409.4" y="87" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$88.53</text><text x="473.8" y="87" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$124.33</text>
+<line x1="598.9" y1="148" x2="832.8" y2="148" stroke="#36a269" stroke-width="12" stroke-linecap="round"/>
+<text x="598.9" y="137" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$193.81</text><text x="840.8" y="137" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$323.77</text>
+<circle cx="644.8" cy="198" r="7" fill="#9567bd"/><text x="644.8" y="187" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$219.32</text>
+<circle cx="480.7" cy="248" r="7" fill="#e1932e"/><text x="480.7" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$128.19</text>
+<line x1="763.8" y1="298" x2="834.3" y2="298" stroke="#20a6a6" stroke-width="12" stroke-linecap="round"/>
+<text x="763.8" y="287" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$285.43</text><text x="842.3" y="287" text-anchor="end" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#263244">$324.63</text>
+<text x="28" y="379" font-family="Arial, sans-serif" font-size="10" fill="#718096">Figures from docs/reports/valuation/README.md. Microsoft included in EV ranges under a stated zero commercial-paper assumption.</text></svg>

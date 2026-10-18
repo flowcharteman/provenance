@@ -152,6 +152,11 @@ export default function CompanyDetailPage() {
                 </div>
               )}
             </dl>
+            {company.cik === "0000320193" && (
+              <p className="detail-back-link">
+                <Link href={`/valuation/${company.id}`}>View reviewed valuation summary →</Link>
+              </p>
+            )}
           </section>
 
           <section className="facts-section" aria-label="Financial facts">
