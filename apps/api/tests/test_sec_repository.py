@@ -152,6 +152,7 @@ class SecRepositoryTests(unittest.IsolatedAsyncioTestCase):
                 "unit": "USD",
                 "fiscal_year": 2025,
                 "accession_number": "0000320193-25-000079",
+                "period_end": "2025-09-27",
             }
         ]
         connection = FakeReadConnection(facts)
@@ -166,4 +167,5 @@ class SecRepositoryTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("fact.context->>'fiscal_year'", statement)
         self.assertIn("fact.context->>'accession_number'", statement)
         self.assertIn("fact.version_number DESC", statement)
+        self.assertIn("accession_number,\n                    period_end", statement)
         self.assertTrue(statement.lstrip().startswith("WITH"))

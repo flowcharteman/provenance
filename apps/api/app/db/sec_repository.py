@@ -653,7 +653,8 @@ class SecPostgresRepository:
                     value,
                     unit,
                     fiscal_year,
-                    accession_number
+                    accession_number,
+                    period_end
                 FROM latest_fiscal_facts
                 ORDER BY fiscal_year DESC NULLS LAST,
                          period_end DESC NULLS LAST,
